@@ -4,8 +4,8 @@ from core.picture import co_detect, GAME_ONE_TIME_POP_UPS
 
 
 def implement(self):
-    if self.server != "JP":
-        self.logger.info("Collect Pass Reward is only available in JP server.")
+    if self.server not in ("JP", "CN"):
+        self.logger.info("Collect Pass Reward is only available in JP and CN servers.")
         return True
     self.to_main_page()
     main_page_to_pass_menu(self)
@@ -31,7 +31,9 @@ def collect_reward(self):
     rgb_possibles = {
         "reward_acquired": (640, 100),
     }
-    img_ends = "pass_collect-reward-unavailable"
+    if self.server == "CN":
+        rgb_possibles["pass_collect-reward-available"] = (1206, 643)
+    img_ends = ["pass_collect-reward-unavailable", "pass_mission-reward-unavailable"]
     co_detect(self, None, rgb_possibles, img_ends, img_possibles, True)
 
 
@@ -66,7 +68,7 @@ def detect_statistics(self):
     self.logger.info("Detect Pass Statistics")
     data = {
         "level": -1,
-        "max_level": 60,
+        "max_level": 41 if self.server == "CN" else 60,
         "next_level_point": -1,
         "next_level_point_required": -1,
         "weekly_point": -1,
@@ -80,7 +82,8 @@ def detect_statistics(self):
 
 def detect_pass_level(self, d):
     region = {
-        "JP": (67, 428, 135, 476)
+        "JP": (67, 428, 135, 476),
+        "CN": (93, 430, 179, 473)
     }
     ret = self.ocr.recognize_int(
         baas=self,
@@ -92,7 +95,8 @@ def detect_pass_level(self, d):
 
 def detect_pass_next_level_point(self, d):
     region = {
-        "JP": (53, 496, 187, 522)
+        "JP": (53, 496, 187, 522),
+        "CN": (55, 495, 199, 523)
     }
     ocr_res = self.ocr.get_region_res(
         self,
@@ -119,7 +123,8 @@ def detect_pass_next_level_point(self, d):
 
 def detect_pass_weekly_point(self, d):
     region = {
-        "JP": (53, 560, 187, 589)
+        "JP": (53, 560, 187, 589),
+        "CN": (55, 562, 241, 590)
     }
     ocr_res = self.ocr.get_region_res(
         self,
