@@ -35,7 +35,9 @@ class Layout(TemplateLayout):
         super().__init__(parent=parent, configItems=configItems, config=config, context='EventMapConfig')
         activity_formation = self.gen_event_formation_attr()
         activity_name = activity_formation['activity_name'] if activity_formation else self.tr('无')
-        name_label = QLabel(self.tr('当期活动：') + activity_name, self)
+        usage_label = QLabel(self.tr('推故事、推任务：先进入游戏内活动关卡列表；战斗使用第1队。'), self)
+        self.vBoxLayout.addWidget(usage_label)
+        name_label = QLabel(self.tr('挑战配置活动：') + activity_name, self)
         optionPanel = QHBoxLayout()
         optionPanel.addWidget(name_label, 0, Qt.AlignLeft)
         self.vBoxLayout.addLayout(optionPanel)
@@ -58,7 +60,7 @@ class Layout(TemplateLayout):
                 total_list.extend(mission_list)
 
             if len(total_list) > 0:
-                labelComponent = QLabel(self.tr('任务属性对应表'), self)
+                labelComponent = QLabel(self.tr('配置关卡属性表（通用推图不使用）'), self)
                 optionPanel = QHBoxLayout()
                 optionPanel.addWidget(labelComponent, 0, Qt.AlignLeft)
                 self.vBoxLayout.addLayout(optionPanel)
