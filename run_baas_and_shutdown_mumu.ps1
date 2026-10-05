@@ -140,14 +140,28 @@ try {
     Start-Sleep -Seconds $durationSeconds
 }
 finally {
-    Stop-BaasProcess -Process $baasProcess -GraceWaitSeconds $CloseWaitSeconds
-    Write-Host "BAAS closed. Sending MuMu shutdown command for all instances..."
-
-    & $mumuManager control -v all shutdown
-
-    if ($LASTEXITCODE -ne 0) {
-        throw "MuMu shutdown command failed with exit code $LASTEXITCODE"
+    $shutdownLog = Join-Path $PSScriptRoot 'log\mumu_shutdown.log'
+    try {
+        Stop-BaasProcess -Process $baasProcess -GraceWaitSeconds $CloseWaitSeconds
     }
+    catch {
+        "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') BAAS close failed: $_" |
+            Out-File -LiteralPath $shutdownLog -Encoding utf8 -Append
+        throw
+    }
+    finally {
+        Write-Host "Sending MuMu shutdown command for all instances..."
+        $shutdownOutput = & $mumuManager control -v all shutdown
+        $shutdownExitCode = $LASTEXITCODE
+        "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') MuMu shutdown exit code: $shutdownExitCode" |
+            Out-File -LiteralPath $shutdownLog -Encoding utf8 -Append
+        $shutdownOutput | Out-File -LiteralPath $shutdownLog -Encoding utf8 -Append
+        $shutdownOutput | Write-Output
 
-    Write-Host "MuMu shutdown command completed."
+        if ($shutdownExitCode -ne 0) {
+            throw "MuMu shutdown command failed with exit code $shutdownExitCode"
+        }
+
+        Write-Host "MuMu shutdown command completed."
+    }
 }
