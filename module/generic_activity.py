@@ -95,7 +95,7 @@ def _return_to_list(self, region):
         if _on_list(self, region) or (
             image.compare_image(self, "activity_menu") and _select_list(self, region)
         ):
-            time.sleep(0.8)
+            time.sleep(2)
             self.update_screenshot_array()
             return True
         for name, point in reactions.items():
@@ -197,14 +197,10 @@ def implement(self, region):
             if not _return_to_list(self, region):
                 return False
             if stage_result != "reward_acquired":
-                current = next((row for row in _rows(self, region) if row[0] == number), None)
-                if current is None:
-                    open_task = to_story_task_info if region == "story" else to_mission_task_info
-                    visible_rows = _rows(self, region)
-                    total = max([number] + [row[0] for row in visible_rows])
-                    plot = open_task(self, number, total)
-                else:
-                    plot = _open_stage(self, current[1], current[2])
+                open_task = to_story_task_info if region == "story" else to_mission_task_info
+                visible_rows = _rows(self, region)
+                total = max([number] + [row[0] for row in visible_rows])
+                plot = open_task(self, number, total)
                 if check_sweep_availability(self, plot) != "sss":
                     self.logger.warning(f"Stage {number} is not complete/three-star; stopped.")
                     _return_to_list(self, region)
