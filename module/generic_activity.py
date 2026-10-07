@@ -138,7 +138,7 @@ def _start_stage(self):
             self.click(151, 387, duration=0.5, wait_over=True)
         start_fight(self, 1)
         auto_fight(self)
-    return True
+    return "reward_acquired" if result == "reward_acquired" else True
 
 
 def implement(self, region):
@@ -185,19 +185,21 @@ def implement(self, region):
             _return_to_list(self, region)
             return False
         if status != "sss":
-            if not _start_stage(self):
+            stage_result = _start_stage(self)
+            if not stage_result:
                 return False
             if not _return_to_list(self, region):
                 return False
-            current = next((row for row in _rows(self, region) if row[0] == number), None)
-            if current is None:
-                self.logger.warning("Current stage not visible after battle; stopped.")
-                return False
-            plot = _open_stage(self, current[1], current[2])
-            if check_sweep_availability(self, plot) != "sss":
-                self.logger.warning(f"Stage {number} is not complete/three-star; stopped.")
-                _return_to_list(self, region)
-                return False
+            if stage_result != "reward_acquired":
+                current = next((row for row in _rows(self, region) if row[0] == number), None)
+                if current is None:
+                    self.logger.warning("Current stage not visible after battle; stopped.")
+                    return False
+                plot = _open_stage(self, current[1], current[2])
+                if check_sweep_availability(self, plot) != "sss":
+                    self.logger.warning(f"Stage {number} is not complete/three-star; stopped.")
+                    _return_to_list(self, region)
+                    return False
         completed.add(number)
         if not _return_to_list(self, region):
             return False
