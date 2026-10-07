@@ -132,7 +132,7 @@ $baasProcess = $null
 
 try {
     $pythonArguments = '-c "import sys,site,runpy; sys.path.insert(0,''.''); site.addsitedir(''.venv/Lib/site-packages''); runpy.run_path(''window.py'',run_name=''__main__'')"'
-    $baasProcess = Start-Process -FilePath $PythonPath -ArgumentList $pythonArguments -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
+    $baasProcess = Start-Process -FilePath $PythonPath -ArgumentList $pythonArguments -WorkingDirectory $PSScriptRoot -WindowStyle Normal -PassThru
     Write-Host "Started BAAS PID: $($baasProcess.Id)"
 
     $durationSeconds = $DurationMinutes * 60
