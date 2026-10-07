@@ -4,7 +4,9 @@ from statistics import median
 from core import color, image, picture
 from core.exception import RequestHumanTakeOver
 from core.utils import merge_nearby_coordinates
-from module.activities.activity_utils import check_sweep_availability, start_fight
+from module.activities.activity_utils import (
+    check_sweep_availability, start_fight, to_mission_task_info, to_story_task_info,
+)
 from module.main_story import auto_fight
 
 
@@ -90,7 +92,11 @@ def _return_to_list(self, region):
         if picture.match_any_img_feature(self, ["purchase_ap_notice", "purchase_ap_notice-localized"]):
             self.logger.warning("Not enough AP; activity progression stopped.")
             return False
-        if _on_list(self, region):
+        if _on_list(self, region) or (
+            image.compare_image(self, "activity_menu") and _select_list(self, region)
+        ):
+            time.sleep(0.8)
+            self.update_screenshot_array()
             return True
         for name, point in reactions.items():
             if picture.match_img_feature(self, name):
@@ -193,9 +199,12 @@ def implement(self, region):
             if stage_result != "reward_acquired":
                 current = next((row for row in _rows(self, region) if row[0] == number), None)
                 if current is None:
-                    self.logger.warning("Current stage not visible after battle; stopped.")
-                    return False
-                plot = _open_stage(self, current[1], current[2])
+                    open_task = to_story_task_info if region == "story" else to_mission_task_info
+                    visible_rows = _rows(self, region)
+                    total = max([number] + [row[0] for row in visible_rows])
+                    plot = open_task(self, number, total)
+                else:
+                    plot = _open_stage(self, current[1], current[2])
                 if check_sweep_availability(self, plot) != "sss":
                     self.logger.warning(f"Stage {number} is not complete/three-star; stopped.")
                     _return_to_list(self, region)
